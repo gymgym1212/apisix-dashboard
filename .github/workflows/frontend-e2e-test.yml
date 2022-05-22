@@ -3,7 +3,7 @@ name: Frontend e2e test
 on:
   push:
     branches:
-      - master
+      - test
     paths-ignore:
       - 'docs/**'
   pull_request:
