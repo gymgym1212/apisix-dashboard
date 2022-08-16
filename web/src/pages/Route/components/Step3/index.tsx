@@ -24,6 +24,7 @@ import PluginPage from '@/components/Plugin';
 import PluginFlow from '@/components/PluginFlow';
 import { DEFAULT_PLUGIN_FLOW_DATA } from '@/components/PluginFlow/constants';
 import FlowGraph from '@/components/PluginFlow/components/FlowGraph';
+import { useImperativeHandle } from 'react';
 
 type Props = {
   data: {
@@ -47,13 +48,13 @@ type Props = {
 
 type Mode = 'NORMAL' | 'DRAW';
 
-const Page: React.FC<Props> = ({
+const Page = React.forwardRef(({
   data,
   onChange,
   readonly = false,
   isForceHttps = false,
   isProxyEnable = false,
-}) => {
+}: Props, ref) => {
   const { formatMessage } = useIntl();
   const { plugins = {}, script = DEFAULT_PLUGIN_FLOW_DATA, plugin_config_id = '' } = data;
 
@@ -64,6 +65,10 @@ const Page: React.FC<Props> = ({
   const [mode, setMode] = useState<Mode>(
     Object.keys(script.chart?.cells || {}).length === 0 || disableDraw ? 'NORMAL' : 'DRAW',
   );
+
+  useImperativeHandle(ref, () => ({
+    mode: mode,
+  }))
 
   return (
     <>
@@ -133,6 +138,6 @@ const Page: React.FC<Props> = ({
       {Boolean(mode === 'DRAW') && <PluginFlow chart={script.chart as any} />}
     </>
   );
-};
+}) 
 
 export default Page;

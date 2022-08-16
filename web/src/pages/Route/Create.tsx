@@ -69,6 +69,8 @@ const Page: React.FC<Props> = (props) => {
   const [step, setStep] = useState(1);
   const [stepHeader, setStepHeader] = useState(STEP_HEADER_4);
 
+  const step3Ref = useRef(null);
+
   const setupRoute = (rid: number) =>
     fetchItem(rid).then((data) => {
       const routeData = { ...data };
@@ -155,6 +157,7 @@ const Page: React.FC<Props> = (props) => {
     if (step === 3) {
       return (
         <Step3
+          ref={step3Ref}
           data={step3Data}
           isForceHttps={form1.getFieldValue('redirectOption') === 'forceHttps'}
           isProxyEnable={getProxyRewriteEnable()}
@@ -197,15 +200,25 @@ const Page: React.FC<Props> = (props) => {
     const isScriptConfigured = FlowGraph.graph?.toJSON().cells.length;
     const isPluginsConfigured = Object.keys(step3Data.plugins || {}).length;
 
-    if (step === 3 && isScriptConfigured && isPluginsConfigured) {
+    const mode = step3Ref.current?.mode;
+    // if (step === 3 && isScriptConfigured && isPluginsConfigured) {
+    if(step === 3 && ( (mode === 'NORMAL' && isScriptConfigured) || (mode === 'DRAW' && isPluginsConfigured) )){
+      const content = mode === 'NORMAL'? '编排模式存在内容，是否继续？': '普通模式存在内容，是否继续？';
       Modal.confirm({
         title: formatMessage({ id: 'component.plugin-flow.text.both-modes-exist.title' }),
-        content: formatMessage({ id: 'component.plugin-flow.text.both-modes-exist' }),
+        // content: formatMessage({ id: 'component.plugin-flow.text.both-modes-exist' }),
+        content,
         onOk: () => {
-          const data = FlowGraph.convertToData();
-          if (data) {
-            setStep3Data({ script: data, plugins: {} });
+          if (mode === 'NORMAL') {
+            setStep3Data({ ...step3Data, script: {} });
             setStep(4);
+          }
+          else{
+            const data = FlowGraph.convertToData();
+            if (data) {
+              setStep3Data({ script: data, plugins: {} });
+              setStep(4);
+            }
           }
         },
         okText: formatMessage({ id: 'component.global.confirm' }),
