@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/apisix/manager-api/cmd"
+	// "github.com/apisix/manager-api/dag2lua"
 )
 
 func main() {

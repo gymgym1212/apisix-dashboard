@@ -269,14 +269,17 @@ func (h *Handler) List(c droplet.Context) (interface{}, error) {
 }
 
 func generateLuaCode(script map[string]interface{}) (string, error) {
+	// 序列化 script
 	scriptString, err := json.Marshal(script)
 	if err != nil {
 		return "", err
 	}
+	// 获取当前工作目录
 	workDir, err := filepath.Abs(conf.WorkDir)
 	if err != nil {
 		return "", err
 	}
+	// 获取 dag-to-lua 库所在目录
 	libDir := filepath.Join(workDir, "dag-to-lua/")
 	if err := os.Chdir(libDir); err != nil {
 		log.Errorf("Chdir to libDir failed: %s", err)
@@ -301,7 +304,7 @@ func generateLuaCode(script map[string]interface{}) (string, error) {
 	}
 
 	code := L.GetGlobal("code")
-
+	// code, err := generator.Generate(script)
 	return code.String(), nil
 }
 
