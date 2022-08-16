@@ -28,6 +28,11 @@ import {
   FlowGraphShape,
 } from '../../constants';
 
+const period = {
+  'key-auth': 'rewrite',
+  'cors': 'access',
+}
+
 class FlowGraph {
   public static graph: Graph;
   private static stencil: Addon.Stencil;
@@ -307,6 +312,66 @@ class FlowGraph {
     return [currentId].concat(ids);
   }
 
+  public static checkPeriod(chart: {cells: Cell.Properties[]}){
+    const visitMap = {};
+    const edges = {};
+    const nodes = {};
+    let startNode;
+    const getPeriodById = (nodeId: string) => {
+      return period[nodes[nodeId].attrs?.text?.textWrap?.text ?? nodes[nodeId].attrs?.text?.text];
+    }
+    for(let cell of chart.cells){
+      if(cell.shape === 'edge'){
+        if(edges.hasOwnProperty(cell.source.cell)){
+          edges[cell.source.cell].push(cell.target.cell);
+        }
+        else{
+          edges[cell.source.cell]=[cell.target.cell];
+        }
+      }
+      else{
+        if(cell.shape === FlowGraphShape.start)
+          startNode = cell.id;
+        if(cell.id){
+          nodes[cell.id] = cell;
+        }
+      }
+    }
+    console.log('gym edges',edges);
+    console.log('gym nodes',nodes);
+    
+    let hasError = false;
+    const dfs = (nodeId: string) => {
+      let flag = false;
+      if(getPeriodById(nodeId) === 'rewrite'){
+        flag = true;
+      }
+      if(visitMap[nodeId] === true){
+        return;
+      }
+      visitMap[nodeId] = true;
+      const name = nodes[nodeId].attrs?.text?.textWrap?.text ?? nodes[nodeId].attrs?.text?.text;
+      console.log('gym in',name, getPeriodById(nodeId),edges.hasOwnProperty(nodeId));
+  
+      if(!edges.hasOwnProperty(nodeId)){
+        return flag;
+      }
+      for(let to of edges[nodeId]){
+        if(visitMap[to]!==true && dfs(to) === true){
+          flag = true
+          if(getPeriodById(nodeId) === 'access'){
+            hasError = true;
+          }
+        }
+      }
+      console.log(flag);
+      return flag;
+    }
+
+    dfs(startNode);
+    return hasError;
+  }
+
   /**
    * Convert Graph JSON Data to API Request Body Data
    */
@@ -325,6 +390,13 @@ class FlowGraph {
       ...DEFAULT_PLUGIN_FLOW_DATA,
       chart: chart || this.graph.toJSON(),
     };
+
+    if(this.checkPeriod(data.chart)){
+      notification.warn({
+        message: 'rewrite 阶段的插件不能放在 access 阶段之后',
+      });
+      return;
+    }
 
     const { cells = [] } = data.chart;
 
