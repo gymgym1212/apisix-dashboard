@@ -68,7 +68,7 @@ class FlowGraph {
       {
         name: 'basic',
         title: formatMessage({ id: 'component.plugin-flow.text.general' }),
-        graphHeight: 104,
+        graphHeight: 200,
       },
     ];
 
@@ -110,6 +110,21 @@ class FlowGraph {
         text: {
           textWrap: {
             text: formatMessage({ id: 'component.plugin-flow.text.start-node' }),
+          },
+        },
+      },
+    });
+
+    const r2 = graph.createNode({
+      shape: FlowGraphShape.upstream,
+      attrs: {
+        body: {
+          rx: 24,
+          ry: 24,
+        },
+        text: {
+          textWrap: {
+            text: 'Upstream',
           },
         },
       },
@@ -166,7 +181,7 @@ class FlowGraph {
       },
     });
 
-    this.stencil.load([r1, r3], 'basic');
+    this.stencil.load([r1, r2, r3], 'basic');
     this.pluginTypeList.forEach((type) => {
       const plugins = this.plugins
         .filter((plugin) => plugin.type === type)

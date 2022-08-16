@@ -60,7 +60,7 @@ export const DEFAULT_OPINIONS: Partial<Graph.Options> = {
         zIndex: 0,
       });
     },
-    validateConnection({ sourceView, targetView, sourceMagnet, targetMagnet }) {
+    validateConnection({ sourceView, targetView, sourcePort, targetPort, sourceMagnet, targetMagnet, sourceCell, targetCell }) {
       if (sourceView === targetView) {
         return false;
       }
@@ -68,6 +68,17 @@ export const DEFAULT_OPINIONS: Partial<Graph.Options> = {
         return false;
       }
       if (!targetMagnet) {
+        return false;
+      }
+      if(targetCell?.shape == FlowGraphShape.start){
+        return false;
+      }
+      const sourcePortGroup = sourceCell?.ports?.items.find((item:any)=>{return item.id === sourcePort}).group;
+      const targetPortGroup = targetCell?.ports?.items.find((item:any)=>{return item.id === targetPort}).group;
+      if(sourcePortGroup == 'top'){
+        return false;
+      }
+      if(targetPortGroup == 'bottom'){
         return false;
       }
       return true;
@@ -250,6 +261,7 @@ export enum FlowGraphShape {
   base = 'flow-chart-rect',
   condition = 'flow-chart-condition-rect',
   start = 'flow-chart-start-rect',
+  upstream = 'flow-chart-upstream-rect',
   end = 'flow-chart-end-rect',
   plugin = 'flow-chart-plugin-rect',
 }

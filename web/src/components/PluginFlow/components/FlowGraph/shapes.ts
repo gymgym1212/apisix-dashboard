@@ -41,9 +41,25 @@ export const FlowChartConditionRect = Graph.registerNode(FlowGraphShape.conditio
 
 export const FlowChartStartRect = Graph.registerNode(FlowGraphShape.start, {
   ...DEFAULT_SHAPE_RECT_OPINIONS,
+  id:'START',
   ports: {
     ...DEFAULT_SHAPE_RECT_OPINIONS.ports,
     items: [
+      {
+        group: 'bottom',
+      },
+    ],
+  },
+});
+
+export const FlowChartUpstreamRect = Graph.registerNode(FlowGraphShape.upstream, {
+  ...DEFAULT_SHAPE_RECT_OPINIONS,
+  ports: {
+    ...DEFAULT_SHAPE_RECT_OPINIONS.ports,
+    items: [
+      {
+        group: 'top',
+      },
       {
         group: 'bottom',
       },
